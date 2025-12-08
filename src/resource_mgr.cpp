@@ -26,6 +26,7 @@ Shader ResourceManager::GetShader(std::string name)
 Texture2D ResourceManager::LoadTexture(const char *file, bool alpha, std::string name)
 {
     Textures[name] = loadTextureFromFile(file, alpha);
+    std::cout << "[DEBUG] Successfully loaded: " << file << std::endl; 
     return Textures[name];
 }
 
@@ -102,6 +103,7 @@ Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha)
     unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
     // now generate texture
     texture.Generate(width, height, data);
+    std::cout << "[DEBUG] Loaded " << file << " with dimensions: (" << width << ", " << height << ")" << std::endl;
     // and finally free image data
     stbi_image_free(data);
     return texture;

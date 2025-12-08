@@ -40,10 +40,10 @@ int32_t main()
     // Draw a basic square
     unsigned int VAO, VBO, EBO;
     std::vector<float> vertices = {
-        -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.5f,  0.5f, 0.0f
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // Bottom Left
+        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Top Left
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Bottom Right
+         0.5f,  0.5f, 0.0f, 1.0f, 1.0f  // Top Right
     };
 
     std::vector<unsigned int> indices = { 
@@ -61,9 +61,15 @@ int32_t main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-    const size_t stride = 3 * sizeof(float);
+    const size_t stride = 5 * sizeof(float);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *) 0);
     glEnableVertexAttribArray(0);
+    
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void *) (3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Onto Textures
+    ResourceManager::LoadTexture("assets/brick-wall.jpg", false, "wallTex");
     
     // Main Rendering loop
     while(!glfwWindowShouldClose(window))
@@ -71,19 +77,26 @@ int32_t main()
         processInput(window);
 
         // Screen Background color
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.5f, 0.6f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Start using the shader
         ResourceManager::GetShader("basic").Use();
+
+        // Apply the texture
+        ResourceManager::GetShader("basic").SetInteger("tex", 0);
+        glActiveTexture(GL_TEXTURE0);
+        ResourceManager::GetTexture("wallTex").Bind();
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
-        // Clean up tasks
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     
-
+    // Clean up
+    ResourceManager::Clear();
+    glfwTerminate();
     return 0;
 }
