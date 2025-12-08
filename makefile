@@ -13,6 +13,8 @@ SRC_FILES= 	$(SRC_DIR)/main.cpp \
 			$(SRC_DIR)/resource_mgr.cpp \
 			$(SRC_DIR)/shader.cpp \
 			$(SRC_DIR)/texture.cpp \
+			$(SRC_DIR)/object_model.cpp \
+			$(SRC_DIR)/wall_model.cpp \
 			$(SRC_DIR)/glad.c
 
 TARGET=$(BUILD_DIR)/$(NAME)

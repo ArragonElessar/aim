@@ -14,7 +14,11 @@ std::map<std::string, Shader>       ResourceManager::Shaders;
 
 Shader ResourceManager::LoadShader(const char *vShaderFile, const char *fShaderFile, const char *gShaderFile, std::string name)
 {
+
+    if(Shaders.find(name) != Shaders.end()) return Shaders[name];
+
     Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
+    std::cout << "[DEBUG] Loaded shaders: " << vShaderFile << ", " << fShaderFile << std::endl;
     return Shaders[name];
 }
 
@@ -25,6 +29,9 @@ Shader ResourceManager::GetShader(std::string name)
 
 Texture2D ResourceManager::LoadTexture(const char *file, bool alpha, std::string name)
 {
+
+    if(Textures.find(name) != Textures.end()) return Textures[name];
+
     Textures[name] = loadTextureFromFile(file, alpha);
     std::cout << "[DEBUG] Successfully loaded: " << file << std::endl; 
     return Textures[name];

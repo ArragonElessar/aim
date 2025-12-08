@@ -3,9 +3,14 @@
 #include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 #include "window_mgr.hpp"
 #include "resource_mgr.hpp"
+#include "wall_model.hpp"
 
 #define SCREEN_WIDTH  1366
 #define SCREEN_HEIGHT 768
@@ -34,43 +39,18 @@ int32_t main()
 
     std::cout << "[DEBUG] Successfully Created Screen" << std::endl;
 
-    // Get the basic shaders
-    ResourceManager::LoadShader("shaders/basic.vs", "shaders/basic.fs", NULL, "basic");
-
-    // Draw a basic square
-    unsigned int VAO, VBO, EBO;
-    std::vector<float> vertices = {
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // Bottom Left
-        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Top Left
-         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Bottom Right
-         0.5f,  0.5f, 0.0f, 1.0f, 1.0f  // Top Right
-    };
-
-    std::vector<unsigned int> indices = { 
-        0, 1, 2, 
-        1, 2, 3 
-    }; // Order in which vertices should be drawn
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-    const size_t stride = 5 * sizeof(float);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *) 0);
-    glEnableVertexAttribArray(0);
+    // Create the walls that we need.
+    WallModel wall_a("shaders/basic", "assets/brick-wall.jpg", true, true, 0.5f, 0.5f, glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.5f, 0.0f, 0.5f));
+    WallModel wall_b("shaders/basic", "assets/brick-wall.jpg", true, true, 0.5f, 0.5f, glm::vec3(-0.5f, 0.0f, 0.0f), glm::vec3(-0.5f, 0.0f, 0.5f));
     
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void *) (3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    
-    // Onto Textures
-    ResourceManager::LoadTexture("assets/brick-wall.jpg", false, "wallTex");
-    
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, -0.25f, -2.0f));
+
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
+
+    // Enabling depth testr
+    glEnable(GL_DEPTH_TEST);
     // Main Rendering loop
     while(!glfwWindowShouldClose(window))
     {
@@ -78,19 +58,12 @@ int32_t main()
 
         // Screen Background color
         glClearColor(0.5f, 0.6f, 0.6f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Start using the shader
-        ResourceManager::GetShader("basic").Use();
-
-        // Apply the texture
-        ResourceManager::GetShader("basic").SetInteger("tex", 0);
-        glActiveTexture(GL_TEXTURE0);
-        ResourceManager::GetTexture("wallTex").Bind();
-
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-
+        // for(auto &obj: objects) obj->draw(projection, view);
+        wall_a.draw(projection, view);
+        wall_b.draw(projection, view);
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
