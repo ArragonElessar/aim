@@ -13,8 +13,8 @@
 #include "wall_model.hpp"
 #include "camera.hpp"
 
-#define SCREEN_WIDTH  1366
-#define SCREEN_HEIGHT 768
+#define SCREEN_WIDTH  1920
+#define SCREEN_HEIGHT 1080
 #define SCREEN_TITLE  "AIM"
 
 
@@ -68,7 +68,7 @@ void mouse_movement_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera->ProcessMouseMovement(xoffset, yoffset, true);
+    camera->ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -95,7 +95,7 @@ int32_t main()
 
 
     // To use the view & projection, we need the camera
-    camera = new Camera(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    camera = new Camera(true, glm::vec3(0.0f, 0.35f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     camera->Front = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::mat4 view = camera->GetViewMatrix();
 
@@ -109,12 +109,18 @@ int32_t main()
     // Wall definitions
     float rectWidth = 1.0f, rectHeight = 1.0f;
     std::vector<std::vector<glm::vec3>> wallDefinitions = {
+        { glm::vec3( 0.0f, 0.5f,  -0.5f), glm::vec3( 0.0f, 0.0f, 1.0f) },
+        { glm::vec3( 0.0f, 0.5f,  2.5f), glm::vec3( 0.0f, 0.0f, 1.0f) }, // Normal vectors should point outwards for some reason
         { glm::vec3(-0.5f, 0.5f,   0.0f), glm::vec3(-1.0f, 0.0f, 0.0f) },
         { glm::vec3( 0.5f, 0.5f,   0.0f), glm::vec3( 1.0f, 0.0f, 0.0f) },
         { glm::vec3( 0.0f, 0.0f,  0.0f), glm::vec3( 0.0f, 1.0f, 0.0f) },
-        { glm::vec3(-0.5f, 0.5f,   0.5f), glm::vec3(-1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.5f, 0.5f,   0.5f), glm::vec3( 1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.0f, 0.0f,  0.5f), glm::vec3( 0.0f, 1.0f, 0.0f) },
+        { glm::vec3(-0.5f, 0.5f,   1.0f), glm::vec3(-1.0f, 0.0f, 0.0f) },
+        { glm::vec3( 0.5f, 0.5f,   1.0f), glm::vec3( 1.0f, 0.0f, 0.0f) },
+        { glm::vec3( 0.0f, 0.0f,  1.0f), glm::vec3( 0.0f, 1.0f, 0.0f) },
+        { glm::vec3(-0.5f, 0.5f,   2.0f), glm::vec3(-1.0f, 0.0f, 0.0f) },
+        { glm::vec3( 0.5f, 0.5f,   2.0f), glm::vec3( 1.0f, 0.0f, 0.0f) },
+        { glm::vec3( 0.0f, 0.0f,  2.0f), glm::vec3( 0.0f, 1.0f, 0.0f) },
+        { glm::vec3( 0.0f, 0.5f,  2.5f), glm::vec3( 0.0f, 0.0f, 1.0f) },
     };
 
     std::vector<std::unique_ptr<WallModel>> walls;

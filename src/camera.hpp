@@ -18,9 +18,10 @@ enum Camera_Movement {
 // Default camera values
 const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
-const float SPEED       =  2.5f;
+const float SPEED       =  1.0f;
 const float SENSITIVITY =  0.25f;
 const float ZOOM        =  45.0f;
+const bool  TRUE_FPS    =  false;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -40,6 +41,18 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    bool TrueFPS;
+
+    // constructor with vectors + FPS
+    Camera(bool trueFPS, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    {
+        Position = position;
+        WorldUp = up;
+        Yaw = yaw;
+        Pitch = pitch;
+        TrueFPS = trueFPS;
+        updateCameraVectors();
+    }
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -48,6 +61,7 @@ public:
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
+        TrueFPS = TRUE_FPS;
         updateCameraVectors();
     }
     // constructor with scalar values
@@ -57,6 +71,7 @@ public:
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
+        TrueFPS = TRUE_FPS;
         updateCameraVectors();
     }
 
@@ -70,6 +85,7 @@ public:
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
         float velocity = MovementSpeed * deltaTime;
+        float ypos = Position.y;
         if (direction == FORWARD)
             Position += Front * velocity;
         if (direction == BACKWARD)
@@ -78,10 +94,12 @@ public:
             Position -= Right * velocity;
         if (direction == RIGHT)
             Position += Right * velocity;
+        
+        if(TrueFPS) Position.y = ypos; // Basically, we restrict movement on the y axis
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
+    void ProcessMouseMovement(float xoffset, float yoffset)
     {
         xoffset *= MouseSensitivity;
         yoffset *= MouseSensitivity;
@@ -90,13 +108,13 @@ public:
         Pitch += yoffset;
 
         // make sure that when pitch is out of bounds, screen doesn't get flipped
-        if (constrainPitch)
-        {
-            if (Pitch > 89.0f)
-                Pitch = 89.0f;
-            if (Pitch < -89.0f)
-                Pitch = -89.0f;
-        }
+        // if (constrainPitch)
+        // {
+        //     if (Pitch > 89.0f)
+        //         Pitch = 89.0f;
+        //     if (Pitch < -89.0f)
+        //         Pitch = -89.0f;
+        // }
 
         // update Front, Right and Up Vectors using the updated Euler angles
         updateCameraVectors();
