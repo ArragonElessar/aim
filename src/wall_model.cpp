@@ -26,11 +26,11 @@ WallModel::WallModel(std::string shaderName, std::string textureName, bool useEB
 void WallModel::generateGeometry()
 {
     this->vertices = {
-        // X            Y            Z     Texture Coords
-        -this->width, -this->height, 0.0f, 0.0f, 0.0f, // Bottom Left
-        -this->width,  this->height, 0.0f, 0.0f, 1.0f, // Top Left
-         this->width, -this->height, 0.0f, 1.0f, 0.0f, // Bottom Right
-         this->width,  this->height, 0.0f, 1.0f, 1.0f,  // Top Right        
+        // X                 Y               Z     Texture Coords
+        -this->width / 2, -this->height / 2, 0.0f, 0.0f, 0.0f, // Bottom Left
+        -this->width / 2,  this->height / 2, 0.0f, 0.0f, 1.0f, // Top Left
+         this->width / 2, -this->height / 2, 0.0f, 1.0f, 0.0f, // Bottom Right
+         this->width / 2,  this->height / 2, 0.0f, 1.0f, 1.0f,  // Top Right        
     };
 
     this->indices = {
