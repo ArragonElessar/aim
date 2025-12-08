@@ -91,10 +91,6 @@ void WallModel::draw(glm::mat4 projection, glm::mat4 view)
 
     // If we are already along the normal we don't need to rotate
     if( angle != 0.0f ) model = glm::rotate(model, angle, axis);
-    else
-    {
-        std::cout << "Wall rotated by " << angle << "rad, about axis: " << axis.x << "," << axis.y << "," << axis.z << std::endl;
-    }
 
     // Write the Model, View, projection matrices to the shader
     ResourceManager::GetShader(this->shaderName).SetMatrix4("model", model);

@@ -13,8 +13,8 @@
 #include "wall_model.hpp"
 #include "camera.hpp"
 
-#define SCREEN_WIDTH  1920
-#define SCREEN_HEIGHT 1080
+#define SCREEN_WIDTH  2560
+#define SCREEN_HEIGHT 1440
 #define SCREEN_TITLE  "AIM"
 
 
@@ -68,7 +68,7 @@ void mouse_movement_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera->ProcessMouseMovement(xoffset, yoffset);
+    camera->ProcessMouseMovement(xoffset, yoffset, true);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -95,7 +95,7 @@ int32_t main()
 
 
     // To use the view & projection, we need the camera
-    camera = new Camera(true, glm::vec3(0.0f, 0.35f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    camera = new Camera(true, glm::vec3(0.0f, 0.35f, 1.5f), glm::vec3(0.0f, 1.0f, 0.0f));
     camera->Front = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::mat4 view = camera->GetViewMatrix();
 
@@ -103,24 +103,48 @@ int32_t main()
     projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
     // Input handlers
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Capture cursor input & hide it
     glfwSetCursorPosCallback(window, mouse_movement_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
     // Wall definitions
     float rectWidth = 1.0f, rectHeight = 1.0f;
     std::vector<std::vector<glm::vec3>> wallDefinitions = {
-        { glm::vec3( 0.0f, 0.5f,  -0.5f), glm::vec3( 0.0f, 0.0f, 1.0f) },
-        { glm::vec3( 0.0f, 0.5f,  2.5f), glm::vec3( 0.0f, 0.0f, 1.0f) }, // Normal vectors should point outwards for some reason
-        { glm::vec3(-0.5f, 0.5f,   0.0f), glm::vec3(-1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.5f, 0.5f,   0.0f), glm::vec3( 1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.0f, 0.0f,  0.0f), glm::vec3( 0.0f, 1.0f, 0.0f) },
-        { glm::vec3(-0.5f, 0.5f,   1.0f), glm::vec3(-1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.5f, 0.5f,   1.0f), glm::vec3( 1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.0f, 0.0f,  1.0f), glm::vec3( 0.0f, 1.0f, 0.0f) },
-        { glm::vec3(-0.5f, 0.5f,   2.0f), glm::vec3(-1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.5f, 0.5f,   2.0f), glm::vec3( 1.0f, 0.0f, 0.0f) },
-        { glm::vec3( 0.0f, 0.0f,  2.0f), glm::vec3( 0.0f, 1.0f, 0.0f) },
-        { glm::vec3( 0.0f, 0.5f,  2.5f), glm::vec3( 0.0f, 0.0f, 1.0f) },
+
+        // Left side walls
+        { glm::vec3(-1.0f, 0.5f,  1.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
+        { glm::vec3(-1.0f, 0.5f,  0.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
+        { glm::vec3(-1.0f, 0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
+        { glm::vec3(-1.0f, 0.5f, -1.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
+
+        // Right Side Walls
+        { glm::vec3(1.0f, 0.5f,  1.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
+        { glm::vec3(1.0f, 0.5f,  0.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
+        { glm::vec3(1.0f, 0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
+        { glm::vec3(1.0f, 0.5f, -1.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
+
+        // Bottom Walls
+        { glm::vec3(-0.5f, 0.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(-0.5f, 0.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(-0.5f, 0.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+
+        { glm::vec3(0.5f, 0.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(0.5f, 0.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(0.5f, 0.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(0.5f, 0.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+
+        // Top Walls
+        { glm::vec3(-0.5f, 1.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(-0.5f, 1.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(-0.5f, 1.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(-0.5f, 1.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+
+        { glm::vec3(0.5f, 1.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(0.5f, 1.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(0.5f, 1.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+        { glm::vec3(0.5f, 1.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
+
     };
 
     std::vector<std::unique_ptr<WallModel>> walls;
@@ -133,6 +157,24 @@ int32_t main()
             wallDef[0], wallDef[1]
         ));
     }
+
+    // push the grey walls
+    std::vector<std::vector<glm::vec3>> greyWallDefinitions = {
+        {glm::vec3( 0.5f, 0.5f, -2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
+        {glm::vec3(-0.5f, 0.5f, -2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
+        {glm::vec3( 0.5f, 0.5f,  2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
+        {glm::vec3(-0.5f, 0.5f,  2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
+    };
+    for ( auto greyWallDef : greyWallDefinitions)
+    {
+        walls.push_back(std::make_unique<WallModel>(
+            "shaders/basic", "assets/gray-wall.jpg",
+            true, true,
+            rectWidth, rectHeight,
+            greyWallDef[0], greyWallDef[1]
+        ));
+    }
+    
 
 
     // Enabling depth testr
