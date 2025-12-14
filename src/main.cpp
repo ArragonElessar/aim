@@ -13,8 +13,8 @@
 #include "wall_model.hpp"
 #include "camera.hpp"
 
-#define SCREEN_WIDTH  1366
-#define SCREEN_HEIGHT 768
+#define SCREEN_WIDTH  2560
+#define SCREEN_HEIGHT 1440
 #define SCREEN_TITLE  "AIM"
 
 
@@ -58,6 +58,16 @@ void processInput(GLFWwindow* window)
     if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE )
     {
         camera->ActivateSprint( false );
+    }
+
+    // Handle Crouching - toggle based crouches
+    if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS )
+    {
+        camera->UpdateCrouch( 0 );
+    }
+    if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE )
+    {
+        camera->UpdateCrouch( 1 );
     }
 
     // Pass the direction to the camera
@@ -188,6 +198,27 @@ int32_t main()
         ));
     }
     
+    // We are using the wall model for the targets as well
+    std::vector<std::unique_ptr<WallModel>> targets;
+
+    // Define the characteristics for the targets
+    float targetWidth = 0.2f, targetHeight = 0.2f;
+    std::vector<std::vector<glm::vec3>> targetDefinitions = {
+        {glm::vec3(  0.0f, 0.5f, -1.8f), glm::vec3(0.0f, 0.0f, 1.0f)},
+        {glm::vec3( -0.5f, 0.5f, -1.8f), glm::vec3(0.0f, 0.0f, 1.0f)},
+        {glm::vec3(  0.5f, 0.5f, -1.8f), glm::vec3(0.0f, 0.0f, 1.0f)}
+    };
+    for ( auto targetDef : targetDefinitions )
+    {
+        targets.push_back(std::make_unique<WallModel>(
+            "shaders/basic", "assets/target.jpg",
+            true, true,
+            targetWidth, targetHeight,
+            targetDef[0], targetDef[1]
+        ));
+    }
+
+
     // Enabling depth test
     glEnable(GL_DEPTH_TEST);
     // Main Rendering loop
@@ -212,6 +243,12 @@ int32_t main()
         for(auto& wall: walls)
         {
             wall->draw(projection, view);
+        }
+
+        // Draw the targets
+        for(auto& target: targets)
+        {
+            target->draw(projection, view);
         }
 
         glfwSwapBuffers(window);

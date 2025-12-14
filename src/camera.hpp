@@ -22,7 +22,9 @@ const float SPEED         =  1.0f;
 const float SENSITIVITY   =  0.25f;
 const float ZOOM          =  45.0f;
 const bool  TRUE_FPS      =  false;
-const float SPRINT_FACTOR = 1.5f;
+const float SPRINT_FACTOR =  2.0f;
+const float CROUCH_FACTOR =  0.7f; // Player's height * Factor upon crouching 
+const float CROUCH_SPEED  =  0.5f; // Speed in which player can move up / down during crouching
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -43,12 +45,16 @@ public:
     float MouseSensitivity;
     float Zoom;
     bool TrueFPS;
-    bool ActiveSprint;
+    int CrouchState;
+    float PlayerHeight;
 
     // constructor with vectors + FPS
     Camera(bool trueFPS, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = position;
+        PlayerHeight = Position.y;
+        ActiveCrouch = false;
+        CrouchState = 0; 
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
@@ -62,6 +68,9 @@ public:
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = position;
+        PlayerHeight = Position.y;
+        ActiveCrouch = false;
+        CrouchState = 0;
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
@@ -73,6 +82,9 @@ public:
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = glm::vec3(posX, posY, posZ);
+        ActiveCrouch = false;
+        PlayerHeight = Position.y;
+        CrouchState = 0;
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
@@ -87,10 +99,34 @@ public:
         return glm::lookAt(Position, Position + Front, Up);
     }
 
+    // handles sprinting and crouching actions
     void ActivateSprint( bool active )
     {
         if(ActiveSprint != active ) std::cout << "[DEBUG] Active Sprint: " << active << std::endl;
         ActiveSprint = active; // Keyboard inputs should handle
+    }
+
+    void UpdateCrouch ( int input )
+    {
+        // Input 0 -> Press, 1 -> Release
+        if( CrouchState == 0 )
+        {
+            // Base Case -> Move to State Pressing if Crouch Pressed
+            if ( input == 0 ) CrouchState = 1;
+        }
+        else if( CrouchState == 1 )
+        {
+            // Crouch Button Pressing -> Toggle Crouch active & move to base State if Crouch Released
+            if ( input  == 1 ) 
+            {
+                std::cout << "[DEBUG] Active Crouch: " << std::to_string(ActiveCrouch) << std::endl;
+                ActiveCrouch = !ActiveCrouch;
+                CrouchState = 0;
+            }
+        }
+
+        // std::cout << "[DEBUG] CrouchState, Input: " << CrouchState << " " << input << std::endl; 
+
     }
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -108,8 +144,16 @@ public:
         }
 
         // To enable FPS, maintain the same y position
-        // TODO - we need to allow jumps and crouches later
+        // TODO - we need to allow jumps later
         float ypos = Position.y;
+        if( ActiveCrouch && ( ypos > CROUCH_FACTOR * PlayerHeight) )
+        {
+            ypos -= CROUCH_SPEED * deltaTime;
+        } 
+        if ( !ActiveCrouch && ( ypos < PlayerHeight) )
+        {
+            ypos += CROUCH_SPEED * deltaTime;  
+        }
 
         // Update the position
         Position += direction * velocity;
@@ -151,6 +195,11 @@ public:
     }
 
 private:
+    
+    // Internal Variables
+    bool ActiveSprint;
+    bool ActiveCrouch;
+
     // calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors()
     {
