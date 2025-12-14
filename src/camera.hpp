@@ -16,12 +16,13 @@ enum Camera_Movement {
 };
 
 // Default camera values
-const float YAW         = -90.0f;
-const float PITCH       =  0.0f;
-const float SPEED       =  1.0f;
-const float SENSITIVITY =  0.25f;
-const float ZOOM        =  45.0f;
-const bool  TRUE_FPS    =  false;
+const float YAW           = -90.0f;
+const float PITCH         =  0.0f;
+const float SPEED         =  1.0f;
+const float SENSITIVITY   =  0.25f;
+const float ZOOM          =  45.0f;
+const bool  TRUE_FPS      =  false;
+const float SPRINT_FACTOR = 1.5f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -42,6 +43,7 @@ public:
     float MouseSensitivity;
     float Zoom;
     bool TrueFPS;
+    bool ActiveSprint;
 
     // constructor with vectors + FPS
     Camera(bool trueFPS, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -52,6 +54,7 @@ public:
         Pitch = pitch;
         TrueFPS = trueFPS;
         Front = glm::vec3(0.0f, 0.0f, 1.0f);
+        ActiveSprint = false;
         updateCameraVectors();
     }
 
@@ -63,6 +66,7 @@ public:
         Yaw = yaw;
         Pitch = pitch;
         TrueFPS = TRUE_FPS;
+        ActiveSprint = false;
         updateCameraVectors();
     }
     // constructor with scalar values
@@ -73,6 +77,7 @@ public:
         Yaw = yaw;
         Pitch = pitch;
         TrueFPS = TRUE_FPS;
+        ActiveSprint = false;
         updateCameraVectors();
     }
 
@@ -82,19 +87,32 @@ public:
         return glm::lookAt(Position, Position + Front, Up);
     }
 
-    // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime)
+    void ActivateSprint( bool active )
     {
-        float velocity = MovementSpeed * deltaTime;
+        if(ActiveSprint != active ) std::cout << "[DEBUG] Active Sprint: " << active << std::endl;
+        ActiveSprint = active; // Keyboard inputs should handle
+    }
+
+    // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
+    void ProcessKeyboard(glm::vec3 direction, float deltaTime)
+    {
+        // Handle sprinting -- TODO the terminology here needs to be improved
+        float velocity;
+        if(ActiveSprint)
+        {
+            velocity = SPRINT_FACTOR * MovementSpeed * deltaTime;
+        }
+        else
+        {
+            velocity = MovementSpeed * deltaTime;
+        }
+
+        // To enable FPS, maintain the same y position
+        // TODO - we need to allow jumps and crouches later
         float ypos = Position.y;
-        if (direction == FORWARD)
-            Position += Front * velocity;
-        if (direction == BACKWARD)
-            Position -= Front * velocity;
-        if (direction == LEFT)
-            Position -= Right * velocity;
-        if (direction == RIGHT)
-            Position += Right * velocity;
+
+        // Update the position
+        Position += direction * velocity;
         
         if(TrueFPS) Position.y = ypos; // Basically, we restrict movement on the y axis
     }

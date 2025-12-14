@@ -13,8 +13,8 @@
 #include "wall_model.hpp"
 #include "camera.hpp"
 
-#define SCREEN_WIDTH  2560
-#define SCREEN_HEIGHT 1440
+#define SCREEN_WIDTH  1366
+#define SCREEN_HEIGHT 768
 #define SCREEN_TITLE  "AIM"
 
 
@@ -30,23 +30,38 @@ void processInput(GLFWwindow* window)
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
+    // Abstracting the directions from the keys so that sprinting is balanced
+    glm::vec3 direction(0.0f); 
+
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        camera->ProcessKeyboard(Camera_Movement::FORWARD, deltaTime); // Move towards where the camera is facing
+        direction += camera->Front; // Forward
     }
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        camera->ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime); // Move away from where camera is facing
+        direction -= camera->Front; // Backward
     }
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        // We need to find the right vector -> cross between up and camera facing 
-        camera->ProcessKeyboard(Camera_Movement::LEFT, deltaTime);;
+        direction -= camera->Right; // Left
     }
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camera->ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);  
+        direction += camera->Right; // Right
     }
+
+    // handle sprinting
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS )
+    {
+        camera->ActivateSprint( true );
+    }
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE )
+    {
+        camera->ActivateSprint( false );
+    }
+
+    // Pass the direction to the camera
+    camera->ProcessKeyboard(direction, deltaTime);
 }
 
 // Handle the mouse movements
@@ -54,8 +69,6 @@ bool firstPos = true;
 float lastX, lastY;
 void mouse_movement_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    // std::cout << "[DEBUG] X, Y: (" << xpos << ", " << ypos << "), Camera Pointing at: " << camera->Front.x << ", " << camera->Front.y << ", " << camera->Front.z << ", Position: " << camera->Position.x << ", " << camera->Position.y << ", " << camera->Position.z << std::endl;
-    
     if(firstPos)
     {
         lastX = xpos;
@@ -175,9 +188,7 @@ int32_t main()
         ));
     }
     
-
-
-    // Enabling depth testr
+    // Enabling depth test
     glEnable(GL_DEPTH_TEST);
     // Main Rendering loop
     while(!glfwWindowShouldClose(window))
