@@ -7,6 +7,7 @@ LIBS= -lglfw -ldl
 
 SRC_DIR=src
 BUILD_DIR=build
+INCLUDES=include
 
 SRC_FILES= 	$(SRC_DIR)/main.cpp \
 			$(SRC_DIR)/window_mgr.cpp \
@@ -23,10 +24,15 @@ all: debug
 
 debug:
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -g $(SRC_FILES) -o $(TARGET) $(LIBS)
+	$(CXX) $(CXXFLAGS) -g $(SRC_FILES) -I $(INCLUDES) -o $(TARGET) $(LIBS)
 
 run: debug
 	./$(TARGET)
+
+json_parse:
+	@mkdir -p $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -g $(SRC_DIR)/json_parse.cpp -I $(INCLUDES) -o $(BUILD_DIR)/json_parse.exe $(LIBS)
+	$(BUILD_DIR)/json_parse.exe
 
 clean:
 	rm -rf $(BUILD_DIR)/*

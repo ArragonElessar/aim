@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "apptrace.hpp"
+
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
@@ -89,7 +91,7 @@ public:
 
     void ActivateSprint( bool active )
     {
-        if(ActiveSprint != active ) std::cout << "[DEBUG] Active Sprint: " << active << std::endl;
+        if(ActiveSprint != active ) AppTrace::log(TRACE_LEVEL::DEBUG, "Active Sprint Status: " + std::to_string(active));
         ActiveSprint = active; // Keyboard inputs should handle
     }
 

@@ -14,6 +14,8 @@
 #include "camera.hpp"
 #include "apptrace.hpp"
 
+#include "level_builder.hpp"
+
 #define SCREEN_WIDTH  1366
 #define SCREEN_HEIGHT 768
 #define SCREEN_TITLE  "AIM"
@@ -93,10 +95,9 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 int32_t main()
 {
     // CRUCIAL to enable Logging
-    AppTrace::log_depth = TRACE_LEVEL::INFO;
+    AppTrace::log_depth = TRACE_LEVEL::DEBUG;
 
     AppTrace::log(TRACE_LEVEL::INFO, "Hello World from Aim Game");
-    AppTrace::log(TRACE_LEVEL::WARNING, "This is a warning " + std::to_string(3));
 
     GLFWwindow* window;
     try{
@@ -191,7 +192,13 @@ int32_t main()
             greyWallDef[0], greyWallDef[1]
         ));
     }
-    
+
+    // Level builder shit
+    Model plane("plane");
+    LevelBuilder::ParseJsonToModel("models/simple_plane.json", &plane);
+    ResourceManager::LoadShader("shaders/model_shader.vs", "shaders/model_shader.fs", nullptr, "model_shader");
+
+
     // Enabling depth test
     glEnable(GL_DEPTH_TEST);
     // Main Rendering loop
@@ -217,6 +224,13 @@ int32_t main()
         {
             wall->draw(projection, view);
         }
+
+        // Draw the plane
+        ResourceManager::GetShader("model_shader").Use();
+        ResourceManager::GetShader("model_shader").SetMatrix4("model", glm::mat4(1.0f));
+        ResourceManager::GetShader("model_shader").SetMatrix4("view", view);
+        ResourceManager::GetShader("model_shader").SetMatrix4("projection", projection);
+        plane.Draw("model_shader");
 
         glfwSwapBuffers(window);
         glfwPollEvents();

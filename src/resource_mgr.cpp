@@ -6,6 +6,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION // Order of include matters
 #include "stb_image.h"
+#include "apptrace.hpp"
 
 // Instantiate static variables
 std::map<std::string, Texture2D>    ResourceManager::Textures;
@@ -14,11 +15,11 @@ std::map<std::string, Shader>       ResourceManager::Shaders;
 
 Shader ResourceManager::LoadShader(const char *vShaderFile, const char *fShaderFile, const char *gShaderFile, std::string name)
 {
-
+    // Kinda shader cache
     if(Shaders.find(name) != Shaders.end()) return Shaders[name];
 
     Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
-    std::cout << "[DEBUG] Loaded shaders: " << vShaderFile << ", " << fShaderFile << std::endl;
+    AppTrace::log(TRACE_LEVEL::DEBUG, "Loaded shaders: " + std::string(vShaderFile) + ", " + std::string(fShaderFile));
     return Shaders[name];
 }
 
@@ -29,11 +30,11 @@ Shader ResourceManager::GetShader(std::string name)
 
 Texture2D ResourceManager::LoadTexture(const char *file, bool alpha, std::string name)
 {
-
+    // Kinda texture cache
     if(Textures.find(name) != Textures.end()) return Textures[name];
 
     Textures[name] = loadTextureFromFile(file, alpha);
-    std::cout << "[DEBUG] Successfully loaded: " << file << std::endl; 
+    AppTrace::log(TRACE_LEVEL::DEBUG, "Successfully loaded: " + std::string(file));
     return Textures[name];
 }
 
@@ -110,7 +111,7 @@ Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha)
     unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
     // now generate texture
     texture.Generate(width, height, data);
-    std::cout << "[DEBUG] Loaded " << file << " with dimensions: (" << width << ", " << height << ")" << std::endl;
+    AppTrace::log(TRACE_LEVEL::DEBUG, "Loaded texture: " + std::string(file) + " with dimensions: (" + std::to_string(width) + ", " + std::to_string(height) + ")");
     // and finally free image data
     stbi_image_free(data);
     return texture;
