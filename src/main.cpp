@@ -12,6 +12,7 @@
 #include "resource_mgr.hpp"
 #include "wall_model.hpp"
 #include "camera.hpp"
+#include "apptrace.hpp"
 
 #define SCREEN_WIDTH  1366
 #define SCREEN_HEIGHT 768
@@ -19,7 +20,6 @@
 
 
 Camera *camera;
-
 // Time calculation for the game
 float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
@@ -92,7 +92,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 int32_t main()
 {
-    std::cout << "[DEBUG] Hello World!" << std::endl;
+    // CRUCIAL to enable Logging
+    AppTrace::log_depth = TRACE_LEVEL::INFO;
+
+    AppTrace::log(TRACE_LEVEL::INFO, "Hello World from Aim Game");
+    AppTrace::log(TRACE_LEVEL::WARNING, "This is a warning " + std::to_string(3));
 
     GLFWwindow* window;
     try{
@@ -104,7 +108,7 @@ int32_t main()
         return 0;
     }
 
-    std::cout << "[DEBUG] Successfully Created Screen" << std::endl;
+    AppTrace::log(TRACE_LEVEL::DEBUG, "Screen Created Successfully");
 
 
     // To use the view & projection, we need the camera
