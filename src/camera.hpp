@@ -9,22 +9,11 @@
 
 #include "apptrace.hpp"
 
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum Camera_Movement {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT
-};
-
 // Default camera values
-const float YAW           = -90.0f;
-const float PITCH         =  0.0f;
-const float SPEED         =  1.0f;
-const float SENSITIVITY   =  0.25f;
-const float ZOOM          =  45.0f;
-const bool  TRUE_FPS      =  false;
-const float SPRINT_FACTOR =  1.5f;
+const float YAW         = -90.0f;
+const float PITCH       =  0.0f;
+const float SENSITIVITY =  0.1f;
+const float ZOOM        =  45.0f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -41,46 +30,18 @@ public:
     float Yaw;
     float Pitch;
     // camera options
-    float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
-    bool TrueFPS;
-    bool ActiveSprint;
-
-    // constructor with vectors + FPS
-    Camera(bool trueFPS, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
-    {
-        Position = position;
-        WorldUp = up;
-        Yaw = yaw;
-        Pitch = pitch;
-        TrueFPS = trueFPS;
-        Front = glm::vec3(0.0f, 0.0f, 1.0f);
-        ActiveSprint = false;
-        updateCameraVectors();
-    }
 
     // constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = position;
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
-        TrueFPS = TRUE_FPS;
-        ActiveSprint = false;
         updateCameraVectors();
-    }
-    // constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
-    {
-        Position = glm::vec3(posX, posY, posZ);
-        WorldUp = glm::vec3(upX, upY, upZ);
-        Yaw = yaw;
-        Pitch = pitch;
-        TrueFPS = TRUE_FPS;
-        ActiveSprint = false;
-        updateCameraVectors();
+        AppTrace::log(TRACE_LEVEL::INFO, "Camera Initialised successfully.");
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
@@ -89,38 +50,13 @@ public:
         return glm::lookAt(Position, Position + Front, Up);
     }
 
-    void ActivateSprint( bool active )
+    void UpdatePosition(glm::vec3 position)
     {
-        if(ActiveSprint != active ) AppTrace::log(TRACE_LEVEL::DEBUG, "Active Sprint Status: " + std::to_string(active));
-        ActiveSprint = active; // Keyboard inputs should handle
-    }
-
-    // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(glm::vec3 direction, float deltaTime)
-    {
-        // Handle sprinting -- TODO the terminology here needs to be improved
-        float velocity;
-        if(ActiveSprint)
-        {
-            velocity = SPRINT_FACTOR * MovementSpeed * deltaTime;
-        }
-        else
-        {
-            velocity = MovementSpeed * deltaTime;
-        }
-
-        // To enable FPS, maintain the same y position
-        // TODO - we need to allow jumps and crouches later
-        float ypos = Position.y;
-
-        // Update the position
-        Position += direction * velocity;
-        
-        if(TrueFPS) Position.y = ypos; // Basically, we restrict movement on the y axis
+        Position = position; // Position just depends on the player position, height.
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
+    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
     {
         xoffset *= MouseSensitivity;
         yoffset *= MouseSensitivity;
@@ -144,7 +80,6 @@ public:
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
-        yoffset *= MouseSensitivity;
         Zoom -= (float)yoffset;
         if (Zoom < 1.0f)
             Zoom = 1.0f;

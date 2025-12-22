@@ -12,15 +12,14 @@
 #include "resource_mgr.hpp"
 #include "camera.hpp"
 #include "apptrace.hpp"
-
+#include "player.hpp"
 #include "level_builder.hpp"
 
 #define SCREEN_WIDTH  1366
 #define SCREEN_HEIGHT 768
 #define SCREEN_TITLE  "AIM"
 
-
-Camera *camera;
+Player *player;
 // Time calculation for the game
 float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
@@ -36,33 +35,33 @@ void processInput(GLFWwindow* window)
 
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        direction += camera->Front; // Forward
+        direction += player->camera->Front; // Forward
     }
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        direction -= camera->Front; // Backward
+        direction -= player->camera->Front; // Backward
     }
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        direction -= camera->Right; // Left
+        direction -= player->camera->Right; // Left
     }
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        direction += camera->Right; // Right
+        direction += player->camera->Right; // Right
     }
 
     // handle sprinting
     if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS )
     {
-        camera->ActivateSprint( true );
+        player->ActivateSprint( true );
     }
     if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE )
     {
-        camera->ActivateSprint( false );
+        player->ActivateSprint( false );
     }
 
     // Pass the direction to the camera
-    camera->ProcessKeyboard(direction, deltaTime);
+    player->ProcessKeyboard(direction, deltaTime);
 }
 
 // Handle the mouse movements
@@ -82,12 +81,12 @@ void mouse_movement_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera->ProcessMouseMovement(xoffset, yoffset, true);
+    player->camera->ProcessMouseMovement(xoffset, yoffset, true);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera->ProcessMouseScroll(yoffset);
+    player->camera->ProcessMouseScroll(yoffset);
 }
 
 
@@ -110,11 +109,9 @@ int32_t main()
 
     AppTrace::log(TRACE_LEVEL::DEBUG, "Screen Created Successfully");
 
-
-    // To use the view & projection, we need the camera
-    camera = new Camera(true, glm::vec3(0.0f, 0.75f, 1.5f), glm::vec3(0.0f, 1.0f, 0.0f));
-    camera->Front = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::mat4 view = camera->GetViewMatrix();
+    // Create the Player
+    player = new Player("pranav", glm::vec3(0.0f, 0.5f, 1.5f));
+    glm::mat4 view = player->camera->GetViewMatrix();
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
@@ -147,8 +144,8 @@ int32_t main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Update the camera 
-        view = camera->GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera->Zoom), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
+        view = player->camera->GetViewMatrix();
+        projection = glm::perspective(glm::radians(player->camera->Zoom), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
         // Set uniform values for the shader
         auto model_shader = ResourceManager::GetShader("model_shader");
@@ -158,7 +155,7 @@ int32_t main()
         model_shader.SetMatrix4("projection", projection);
 
         // Pass the normal vector for visualisation
-        model_shader.SetVector3f("cameraFront", camera->Front);
+        model_shader.SetVector3f("cameraFront", player->camera->Front);
 
         // Draw the model
         plane.Draw("model_shader");
