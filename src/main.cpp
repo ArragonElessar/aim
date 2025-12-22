@@ -219,17 +219,22 @@ int32_t main()
         view = camera->GetViewMatrix();
         projection = glm::perspective(glm::radians(camera->Zoom), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
-        // Draw the walls
-        for(auto& wall: walls)
-        {
-            wall->draw(projection, view);
-        }
+        // // Draw the walls
+        // for(auto& wall: walls)
+        // {
+        //     wall->draw(projection, view);
+        // }
 
         // Draw the plane
-        ResourceManager::GetShader("model_shader").Use();
-        ResourceManager::GetShader("model_shader").SetMatrix4("model", glm::mat4(1.0f));
-        ResourceManager::GetShader("model_shader").SetMatrix4("view", view);
-        ResourceManager::GetShader("model_shader").SetMatrix4("projection", projection);
+        auto model_shader = ResourceManager::GetShader("model_shader");
+        model_shader.Use();
+        model_shader.SetMatrix4("model", glm::mat4(1.0f));
+        model_shader.SetMatrix4("view", view);
+        model_shader.SetMatrix4("projection", projection);
+
+        // Pass the normal vector for visualisation
+        model_shader.SetVector3f("cameraFront", camera->Front);
+
         plane.Draw("model_shader");
 
         glfwSwapBuffers(window);
