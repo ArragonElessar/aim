@@ -10,7 +10,6 @@
 
 #include "window_mgr.hpp"
 #include "resource_mgr.hpp"
-#include "wall_model.hpp"
 #include "camera.hpp"
 #include "apptrace.hpp"
 
@@ -113,7 +112,7 @@ int32_t main()
 
 
     // To use the view & projection, we need the camera
-    camera = new Camera(true, glm::vec3(0.0f, 0.35f, 1.5f), glm::vec3(0.0f, 1.0f, 0.0f));
+    camera = new Camera(true, glm::vec3(0.0f, 0.75f, 1.5f), glm::vec3(0.0f, 1.0f, 0.0f));
     camera->Front = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::mat4 view = camera->GetViewMatrix();
 
@@ -125,77 +124,9 @@ int32_t main()
     glfwSetCursorPosCallback(window, mouse_movement_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    // Wall definitions
-    float rectWidth = 1.0f, rectHeight = 1.0f;
-    std::vector<std::vector<glm::vec3>> wallDefinitions = {
-
-        // Left side walls
-        { glm::vec3(-1.0f, 0.5f,  1.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
-        { glm::vec3(-1.0f, 0.5f,  0.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
-        { glm::vec3(-1.0f, 0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
-        { glm::vec3(-1.0f, 0.5f, -1.5f), glm::vec3(-1.0f, 0.0f, 0.0f)},
-
-        // Right Side Walls
-        { glm::vec3(1.0f, 0.5f,  1.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
-        { glm::vec3(1.0f, 0.5f,  0.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
-        { glm::vec3(1.0f, 0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
-        { glm::vec3(1.0f, 0.5f, -1.5f), glm::vec3(1.0f, 0.0f, 0.0f)},
-
-        // Bottom Walls
-        { glm::vec3(-0.5f, 0.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(-0.5f, 0.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(-0.5f, 0.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-
-        { glm::vec3(0.5f, 0.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(0.5f, 0.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(0.5f, 0.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(0.5f, 0.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-
-        // Top Walls
-        { glm::vec3(-0.5f, 1.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(-0.5f, 1.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(-0.5f, 1.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(-0.5f, 1.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-
-        { glm::vec3(0.5f, 1.0f,  1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(0.5f, 1.0f,  0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(0.5f, 1.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-        { glm::vec3(0.5f, 1.0f, -1.5f), glm::vec3(0.0f, 1.0f, 0.0f)},
-
-    };
-
-    std::vector<std::unique_ptr<WallModel>> walls;
-    for( auto wallDef: wallDefinitions)
-    {
-        walls.push_back(std::make_unique<WallModel>(
-            "shaders/basic", "assets/brick-wall.jpg",
-            true, true,
-            rectWidth, rectHeight,
-            wallDef[0], wallDef[1]
-        ));
-    }
-
-    // push the grey walls
-    std::vector<std::vector<glm::vec3>> greyWallDefinitions = {
-        {glm::vec3( 0.5f, 0.5f, -2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
-        {glm::vec3(-0.5f, 0.5f, -2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
-        {glm::vec3( 0.5f, 0.5f,  2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
-        {glm::vec3(-0.5f, 0.5f,  2.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
-    };
-    for ( auto greyWallDef : greyWallDefinitions)
-    {
-        walls.push_back(std::make_unique<WallModel>(
-            "shaders/basic", "assets/gray-wall.jpg",
-            true, true,
-            rectWidth, rectHeight,
-            greyWallDef[0], greyWallDef[1]
-        ));
-    }
-
     // Level builder shit
     Model plane("plane");
-    LevelBuilder::ParseJsonToModel("models/simple_plane.json", &plane);
+    LevelBuilder::ParseJsonToModel("models/basic_room.json", &plane);
     ResourceManager::LoadShader("shaders/model_shader.vs", "shaders/model_shader.fs", nullptr, "model_shader");
 
 
@@ -219,13 +150,7 @@ int32_t main()
         view = camera->GetViewMatrix();
         projection = glm::perspective(glm::radians(camera->Zoom), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
-        // // Draw the walls
-        // for(auto& wall: walls)
-        // {
-        //     wall->draw(projection, view);
-        // }
-
-        // Draw the plane
+        // Set uniform values for the shader
         auto model_shader = ResourceManager::GetShader("model_shader");
         model_shader.Use();
         model_shader.SetMatrix4("model", glm::mat4(1.0f));
@@ -235,6 +160,7 @@ int32_t main()
         // Pass the normal vector for visualisation
         model_shader.SetVector3f("cameraFront", camera->Front);
 
+        // Draw the model
         plane.Draw("model_shader");
 
         glfwSwapBuffers(window);

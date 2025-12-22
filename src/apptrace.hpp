@@ -6,7 +6,7 @@
 #include <iostream>
 #include <utility>
 
-enum class TRACE_LEVEL {ERROR, WARNING, INFO, DEBUG};
+enum class TRACE_LEVEL {ERROR, WARNING, INFO, DEBUG, VERBOSE};
 
 class AppTrace
 {

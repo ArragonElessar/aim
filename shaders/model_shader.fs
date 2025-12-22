@@ -13,11 +13,11 @@ void main()
     vec4 normalColor = vec4(0.0f);
     if( normalAlignment > 0.0f )
     {
-        normalColor = vec4(normalAlignment, 0.0f, 0.0f, 0.0f); // Red color if we are facing the face
+        normalColor = vec4(normalAlignment, 0.0f, 0.0f, 0.0f); // Red color if we are facing the face normal
     }
     else
     {
-        normalColor = vec4(0.0f, normalAlignment, 0.0f, 0.0f); // Red color if we are facing the face
+        normalColor = vec4(0.0f, 0.0f,normalAlignment, 0.0f); // Green color if we are facing away from face normal
     }
 
     FragColor = texture(tex, TexCoords) + normalColor;

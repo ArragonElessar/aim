@@ -45,16 +45,17 @@ std::string LevelBuilder::readFileContents(const std::string& filename)
 void LevelBuilder::ParseJsonToModel(std::string jsonFileName, Model* model)
 {
     // We expect a standard JSON Format
+    AppTrace::log(TRACE_LEVEL::INFO, "Parsing Model: " + model->name + " from JSON File: " + jsonFileName);
     auto jsonDoc = readFileContents(jsonFileName);
 
     // now parse the doc
     Document d;
     d.Parse(jsonDoc.c_str());
 
-    AppTrace::log(TRACE_LEVEL::DEBUG, "JSON Parsed successfully: " + std::to_string(d.IsObject()));
+    AppTrace::log(TRACE_LEVEL::VERBOSE, "JSON Parsed successfully: " + std::to_string(d.IsObject()));
 
     const Value& meshes = d["meshes"];
-    AppTrace::log(TRACE_LEVEL::DEBUG, "Number of meshes: " + std::to_string(meshes.Size()));
+    AppTrace::log(TRACE_LEVEL::VERBOSE, "Number of meshes: " + std::to_string(meshes.Size()));
 
 
     Model room("room");
@@ -70,7 +71,7 @@ void LevelBuilder::ParseJsonToModel(std::string jsonFileName, Model* model)
         // parse the ith mesh
         const Value& mesh = meshes[i];
         mesh_name = mesh["name"].GetString();
-        AppTrace::log(TRACE_LEVEL::DEBUG, "Mesh Name: " + mesh_name);
+        AppTrace::log(TRACE_LEVEL::VERBOSE, "Mesh Name: " + mesh_name);
 
         auto json_positions = mesh["positions"].GetArray();
         // print out the vertices
@@ -83,7 +84,7 @@ void LevelBuilder::ParseJsonToModel(std::string jsonFileName, Model* model)
             v.Position.y = static_cast<float>(vertex[1].GetDouble());
             v.Position.z = static_cast<float>(vertex[2].GetDouble());
             
-            AppTrace::log(TRACE_LEVEL::DEBUG, "Vertex: " + std::to_string(v.Position.x) + ", " + std::to_string(v.Position.y) + ", " + std::to_string(v.Position.z));
+            AppTrace::log(TRACE_LEVEL::VERBOSE, "Vertex: " + std::to_string(v.Position.x) + ", " + std::to_string(v.Position.y) + ", " + std::to_string(v.Position.z));
             
             vertices.push_back(v);
 
@@ -98,12 +99,12 @@ void LevelBuilder::ParseJsonToModel(std::string jsonFileName, Model* model)
             indices.push_back(json_indices[j].GetInt());
             ss << indices[j] << " ";
         }
-        AppTrace::log(TRACE_LEVEL::DEBUG, ss.str());
+        AppTrace::log(TRACE_LEVEL::VERBOSE, ss.str());
 
         // textures
         auto json_textures = mesh["texture"].GetString();
         textures.push_back(json_textures);
-        AppTrace::log(TRACE_LEVEL::DEBUG, "Texture: " + textures[0]);
+        AppTrace::log(TRACE_LEVEL::VERBOSE, "Texture: " + textures[0]);
 
         // we need normals per vertice
         auto json_normals = mesh["normals"].GetArray();
@@ -114,6 +115,7 @@ void LevelBuilder::ParseJsonToModel(std::string jsonFileName, Model* model)
             vertices[j].Normal.y = static_cast<float>(normal[1].GetDouble());
             vertices[j].Normal.z = static_cast<float>(normal[2].GetDouble());
 
+            AppTrace::log(TRACE_LEVEL::VERBOSE, "Normal: " + std::to_string(vertices[j].Normal.x) + ", " + std::to_string(vertices[j].Normal.y) + ", " + std::to_string(vertices[j].Normal.z));
         }
 
         // TexCoords
@@ -124,7 +126,7 @@ void LevelBuilder::ParseJsonToModel(std::string jsonFileName, Model* model)
             vertices[j].TexCoords.x = static_cast<float>(texCoord[0].GetDouble());
             vertices[j].TexCoords.y = static_cast<float>(texCoord[1].GetDouble());
 
-            AppTrace::log(TRACE_LEVEL::DEBUG, "TexCoords (x, y): " + std::to_string(vertices[j].TexCoords.x) + ", " + std::to_string(vertices[j].TexCoords.y));
+            AppTrace::log(TRACE_LEVEL::VERBOSE, "TexCoords (x, y): " + std::to_string(vertices[j].TexCoords.x) + ", " + std::to_string(vertices[j].TexCoords.y));
         }
 
         Mesh m(vertices, indices, textures, mesh_name);

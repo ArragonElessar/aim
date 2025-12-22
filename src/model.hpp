@@ -13,10 +13,10 @@ class Model
         Model(std::string name);
         void Draw(std::string shaderName);
         void AddMesh(Mesh mesh);
-
+        std::string name;
     private:
         std::vector<Mesh> meshes;
-        std::string name;
+        
 };
 
 Model::Model(std::string name){

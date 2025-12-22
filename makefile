@@ -14,8 +14,6 @@ SRC_FILES= 	$(SRC_DIR)/main.cpp \
 			$(SRC_DIR)/resource_mgr.cpp \
 			$(SRC_DIR)/shader.cpp \
 			$(SRC_DIR)/texture.cpp \
-			$(SRC_DIR)/object_model.cpp \
-			$(SRC_DIR)/wall_model.cpp \
 			$(SRC_DIR)/glad.c
 
 TARGET=$(BUILD_DIR)/$(NAME)
@@ -28,11 +26,6 @@ debug:
 
 run: debug
 	./$(TARGET)
-
-json_parse:
-	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -g $(SRC_DIR)/json_parse.cpp -I $(INCLUDES) -o $(BUILD_DIR)/json_parse.exe $(LIBS)
-	$(BUILD_DIR)/json_parse.exe
 
 clean:
 	rm -rf $(BUILD_DIR)/*

@@ -24,7 +24,7 @@ const float SPEED         =  1.0f;
 const float SENSITIVITY   =  0.25f;
 const float ZOOM          =  45.0f;
 const bool  TRUE_FPS      =  false;
-const float SPRINT_FACTOR = 1.5f;
+const float SPRINT_FACTOR =  1.5f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
