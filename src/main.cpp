@@ -60,6 +60,16 @@ void processInput(GLFWwindow* window)
         player->ActivateSprint( false );
     }
 
+    // handle crouching 
+    if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS )
+    {
+        player->UpdateCrouchState( 0 );
+    }
+    if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE )
+    {
+        player->UpdateCrouchState( 1 );
+    }
+
     // Pass the direction to the camera
     player->ProcessKeyboard(direction, deltaTime);
 }
@@ -110,7 +120,7 @@ int32_t main()
     AppTrace::log(TRACE_LEVEL::DEBUG, "Screen Created Successfully");
 
     // Create the Player
-    player = new Player("pranav", glm::vec3(0.0f, 0.5f, 1.5f));
+    player = new Player("pranav", glm::vec3(0.0f, 1.2f, 1.5f));
     glm::mat4 view = player->camera->GetViewMatrix();
 
     glm::mat4 projection;
