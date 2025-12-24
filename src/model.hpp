@@ -26,6 +26,7 @@ Model::Model(std::string name){
 void Model::Draw(std::string shaderName)
 {
     // We expect all meshes to be compatible with this shader
+    ResourceManager::GetShader(shaderName).Use();
     for( auto& mesh: meshes)
     {
         mesh.Draw(shaderName);

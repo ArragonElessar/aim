@@ -91,7 +91,6 @@ void Mesh::Draw(std::string shaderName)
 
     if(textures.size() > 1) throw std::runtime_error("[ERROR] More than 1 texture not supported yet.");
     // Apply the texture
-    ResourceManager::GetShader(shaderName).Use();
     ResourceManager::GetShader(shaderName).SetInteger("tex", 0);
     glActiveTexture(GL_TEXTURE0);
     ResourceManager::GetTexture(textures[0]).Bind();

@@ -1,7 +1,4 @@
 Next Steps: 
 1. Collision avoidance, player constrained to the room
 2. Crosshair
-3. Jumps
-4. Camera - Abstraction to player
-5. Ducks and movement 
-6. Camera Sprint
+3. Basic Lighting

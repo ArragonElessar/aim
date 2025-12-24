@@ -1,14 +1,14 @@
 #include "player.hpp"
 
 // Constructor
-Player::Player(std::string name, glm::vec3 basePosition, float height, float radius)
+Player::Player(std::string name, glm::vec3 basePosition, float screenAspectRatio, float height, float radius)
 {
     // Basic Assignment
     this->name = name;
     this->basePosition = basePosition;
     this->height = height > 2.0f ? 2.0f : height; // Don't want extremely long players
     this->radius = radius; // Radius will be used for creating a collider later.
-
+    this->ScreenAspectRatio = screenAspectRatio;
     // Init Player status
     this->ActiveCrouch = false;
     this->ActiveSprint = false;
@@ -22,6 +22,11 @@ Player::Player(std::string name, glm::vec3 basePosition, float height, float rad
     this->camera->Front = glm::vec3(0.0f, 0.0f, -1.0f);
 
     // Probably some collider related stuff
+
+    // Player should handle their own model, view, projection matrices
+    this->model = glm::mat4(1.0f);
+    this->view = this->camera->GetViewMatrix();
+    this->projection = glm::perspective(glm::radians(this->camera->Zoom), screenAspectRatio, 0.1f, 100.0f);
 
     AppTrace::log(TRACE_LEVEL::INFO, "Successfully created player: " + name);
 }
@@ -87,4 +92,23 @@ void Player::UpdateCrouchState(int input)
             CrouchState = 0;
         }
     }
+}
+
+void Player::UpdatePlayerShader(Shader* shader)
+{
+
+    // Update the view and projection matrices
+    view = this->camera->GetViewMatrix();
+    projection = this->projection = glm::perspective(glm::radians(this->camera->Zoom), this->ScreenAspectRatio, 0.1f, 100.0f);
+    
+    // Start using this shader
+    shader->Use();
+
+    // update the shader with these values
+    shader->SetMatrix4("model", this->model);
+    shader->SetMatrix4("view", this->view);
+    shader->SetMatrix4("projection", this->projection);
+
+    // Pass the normal vector for visualisation
+    shader->SetVector3f("cameraFront", this->camera->Front);
 }

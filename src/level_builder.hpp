@@ -102,7 +102,7 @@ void LevelBuilder::ParseJsonToModel(std::string jsonFileName, Model* model)
         AppTrace::log(TRACE_LEVEL::VERBOSE, ss.str());
 
         // textures
-        auto json_textures = mesh["texture"].GetString();
+        auto json_textures = mesh["texture"].GetString(); // Assuming only one texture for an object
         textures.push_back(json_textures);
         AppTrace::log(TRACE_LEVEL::VERBOSE, "Texture: " + textures[0]);
 

@@ -31,6 +31,9 @@ class AppTrace
                     case TRACE_LEVEL::DEBUG:
                         outMessage = "[DEBUG] " + message;
                         break;
+                    case TRACE_LEVEL::VERBOSE:
+                        outMessage = "[VERBOSE] " + message;
+                        break;
                 }
                 std::cout << outMessage << std::endl;
             }    
