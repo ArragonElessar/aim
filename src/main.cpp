@@ -12,6 +12,7 @@
 #include "player.hpp"
 #include "level_builder.hpp"
 #include "input_handler.hpp"
+#include "physics_engine.hpp"
 
 #define SCREEN_WIDTH  1366
 #define SCREEN_HEIGHT 768
@@ -20,7 +21,7 @@
 int32_t main()
 {
     // CRUCIAL to enable Logging
-    AppTrace::log_depth = TRACE_LEVEL::DEBUG;
+    AppTrace::log_depth = TRACE_LEVEL::VERBOSE;
     AppTrace::log(TRACE_LEVEL::INFO, "Hello World from Aim Game");
 
     // Create the window
@@ -29,7 +30,7 @@ int32_t main()
     AppTrace::log(TRACE_LEVEL::DEBUG, "Screen Created Successfully");
 
     // Create the Player, as well as pass the screen aspect ratio
-    Player* player = new Player("pranav", glm::vec3(0.0f, 1.2f, 1.5f), (float)SCREEN_WIDTH / SCREEN_HEIGHT);
+    Player* player = new Player("pranav", glm::vec3(0.0f, 0.0f, 1.5f), (float)SCREEN_WIDTH / SCREEN_HEIGHT);
     
     // Create the input handler
     InputHandler* inputHandler = new InputHandler(player); 
@@ -53,9 +54,19 @@ int32_t main()
     );
 
     // Level builder
-    Model plane("plane");
-    LevelBuilder::ParseJsonToModel("models/basic_room.json", &plane);
+    Model room("room_model");
+    LevelBuilder::ParseJsonToModel("models/basic_room.json", &room);
     ResourceManager::LoadShader("shaders/model_shader.vs", "shaders/model_shader.fs", nullptr, "model_shader");
+
+    // Physics related stuff
+    PhysicsEngine physicsEngine;
+    for(auto m : room.meshes)
+    {
+        AppTrace::log(TRACE_LEVEL::DEBUG, "Adding Mesh (name): " + m.name);
+        physicsEngine.AddStaticMesh(m);
+    }
+    physicsEngine.ShowStaticTriangles();
+    
 
     // Enabling depth test
     glEnable(GL_DEPTH_TEST);
@@ -73,7 +84,7 @@ int32_t main()
         deltaTime = currFrameTime - lastFrameTime;
         lastFrameTime = currFrameTime;
 
-        inputHandler->ProcessKeyboardInput(window, deltaTime);
+        inputHandler->ProcessKeyboardInput(window, deltaTime, &physicsEngine);
 
         // Screen Background color
         glClearColor(0.5f, 0.6f, 0.6f, 1.0f);
@@ -84,7 +95,7 @@ int32_t main()
         player->UpdatePlayerShader(&model_shader);
 
         // Draw the model
-        plane.Draw("model_shader");
+        room.Draw("model_shader");
 
         glfwSwapBuffers(window);
         glfwPollEvents();

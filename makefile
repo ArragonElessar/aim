@@ -2,7 +2,7 @@ NAME=aim
 VERSION=1.0.0
 
 CXX=g++
-CXXFLAGS=-std=c++17
+CXXFLAGS=-std=c++17 -O3 -march=native
 LIBS= -lglfw -ldl
 
 SRC_DIR=src
@@ -15,6 +15,8 @@ SRC_FILES= 	$(SRC_DIR)/main.cpp \
 			$(SRC_DIR)/shader.cpp \
 			$(SRC_DIR)/texture.cpp \
 			$(SRC_DIR)/player.cpp \
+			$(SRC_DIR)/mesh.cpp \
+			$(SRC_DIR)/physics_engine.cpp \
 			$(SRC_DIR)/glad.c
 
 TARGET=$(BUILD_DIR)/$(NAME)

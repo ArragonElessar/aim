@@ -5,10 +5,13 @@ Player::Player(std::string name, glm::vec3 basePosition, float screenAspectRatio
 {
     // Basic Assignment
     this->name = name;
-    this->basePosition = basePosition;
-    this->height = height > 2.0f ? 2.0f : height; // Don't want extremely long players
-    this->radius = radius; // Radius will be used for creating a collider later.
+    auto h = height > 2.0f ? 2.0f : height; // Don't want extremely long players
+    auto r = radius; // Radius will be used for creating a collider later.
     this->ScreenAspectRatio = screenAspectRatio;
+
+    // Create the player capsule
+    this->capsule = new Capsule(basePosition, h, r);
+
     // Init Player status
     this->ActiveCrouch = false;
     this->ActiveSprint = false;
@@ -16,7 +19,7 @@ Player::Player(std::string name, glm::vec3 basePosition, float screenAspectRatio
     this->movement_speed = MOVEMENT_SPEED;
 
     // Initialise the camera
-    glm::vec3 cameraPosition = glm::vec3(basePosition.x, basePosition.y + height, basePosition.z);
+    glm::vec3 cameraPosition = this->capsule->tip;
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Positive Y axis is upwards direction
     this->camera = new Camera(cameraPosition, cameraUp);
     this->camera->Front = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -44,34 +47,41 @@ void Player::ActivateSprint( bool active )
     ActiveSprint = active; // Keyboard inputs should handle
 }
 
-void Player::ProcessKeyboard(glm::vec3 direction, float deltaTime)
+void Player::ProcessKeyboard(glm::vec3 direction, float deltaTime, PhysicsEngine* physicsEngine)
 {
     // Calculate the step length basis if sprint is active or not.
     float step_length = ActiveSprint ? SPRINT_FACTOR * movement_speed * deltaTime : movement_speed * deltaTime;
 
     // TODO - Include crouching here.
-    float ypos = this->basePosition.y;
+    // float ypos = this->capsule->tip.y;
 
     // Update the movement according to keyboard input
     // TODO - here consult the physics engine
-    this->basePosition += direction * step_length;
+    glm::vec3 desiredMovement = direction * step_length;
+    glm::vec3 resolvedMovement = physicsEngine->ResolveMovement(this->capsule, desiredMovement);
 
+    this->capsule->base += resolvedMovement;
+    this->capsule->tip  += resolvedMovement;
+    
     // Handle the crouching logic
-    
     // Sit Down
-    if( ActiveCrouch && ( ypos > CROUCH_FACTOR * height) )
-        ypos -= CROUCH_SPEED * deltaTime;
+    if( ActiveCrouch && ( this->capsule->tip.y > CROUCH_FACTOR * this->capsule->height) )
+    {
+        this->capsule->tip.y -= CROUCH_SPEED * deltaTime;
+        this->capsule->tip.y = std::max(this->capsule->tip.y, CROUCH_FACTOR * this->capsule->height);
+    }
     
-        // Get Back up
-    if ( !ActiveCrouch && ( ypos < height) )
-        ypos += CROUCH_SPEED * deltaTime;  
-    
-
-    // We are an FPS Camera, so we need to disallow movement along y-axis
-    this->basePosition.y = ypos;
+    // Get Back up
+    if ( !ActiveCrouch && ( this->capsule->tip.y < this->capsule->height) )
+    {
+        this->capsule->tip.y += CROUCH_SPEED * deltaTime;  
+    }
+        
+    // For now, since jumps are not enabled, we are disabling going over the player height
+    this->capsule->tip.y = std::min(this->capsule->tip.y, this->capsule->height);
 
     // Also, update the player cam position
-    this->camera->UpdatePosition(glm::vec3(basePosition.x, basePosition.y + 0.4f, basePosition.z));
+    this->camera->UpdatePosition(this->capsule->tip);
 }
 
 void Player::UpdateCrouchState(int input)

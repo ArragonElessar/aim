@@ -1,4 +1,6 @@
 Next Steps: 
-1. Collision avoidance, player constrained to the room
-2. Crosshair
-3. Basic Lighting
+1. Crosshair
+2. Basic Lighting
+3. Moving to modern C++, replace all raw pointers
+4. Add smoother collisions
+5. Gravity, jumping with velocity impulse

@@ -14,7 +14,6 @@ class Model
         void Draw(std::string shaderName);
         void AddMesh(Mesh mesh);
         std::string name;
-    private:
         std::vector<Mesh> meshes;
         
 };
@@ -23,7 +22,7 @@ Model::Model(std::string name){
     this->name = name;
 }
 
-void Model::Draw(std::string shaderName)
+inline void Model::Draw(std::string shaderName)
 {
     // We expect all meshes to be compatible with this shader
     ResourceManager::GetShader(shaderName).Use();
@@ -33,7 +32,7 @@ void Model::Draw(std::string shaderName)
     }
 }
 
-void Model::AddMesh(Mesh mesh)
+inline void Model::AddMesh(Mesh mesh)
 {
     meshes.push_back(mesh);
     AppTrace::log(TRACE_LEVEL::DEBUG, "Added Mesh: " + mesh.name);

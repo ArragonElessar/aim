@@ -5,12 +5,13 @@
 
 #include "player.hpp"
 #include "apptrace.hpp"
+#include "physics_engine.hpp"
 
 class InputHandler
 {
     public:
         InputHandler(Player* player);
-        void ProcessKeyboardInput(GLFWwindow* window, float deltatime);
+        void ProcessKeyboardInput(GLFWwindow* window, float deltatime, PhysicsEngine* physicsEngine);
         void MouseMovementCallback(double xpos, double ypos);
         void MouseScrollCallback(double offset);
 
@@ -28,7 +29,7 @@ InputHandler::InputHandler(Player* player)
     AppTrace::log(TRACE_LEVEL::INFO, "Initialized the input handler for player: " + this->player->name);
 }
 
-void InputHandler::ProcessKeyboardInput(GLFWwindow* window, float deltaTime)
+void InputHandler::ProcessKeyboardInput(GLFWwindow* window, float deltaTime, PhysicsEngine* physicsEngine)
 {
     // Handle all keyboard movements, sprint, crouch
 
@@ -66,7 +67,7 @@ void InputHandler::ProcessKeyboardInput(GLFWwindow* window, float deltaTime)
         player->UpdateCrouchState( 1 );
 
     // Pass the direction to the player, time
-    player->ProcessKeyboard(direction, deltaTime);
+    player->ProcessKeyboard(direction, deltaTime, physicsEngine);
 }
 
 void InputHandler::MouseMovementCallback(double xpos, double ypos)
